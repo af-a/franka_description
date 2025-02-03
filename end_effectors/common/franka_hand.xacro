@@ -122,5 +122,52 @@
       <mimic joint="${ee_prefix}finger_joint1" />
       <dynamics damping="0.3" />
     </joint>
+
+    <!--
+    =======================================================
+            Add Onboard RealSense Camera TF Sub-tree
+    =======================================================
+    -->
+    <!-- Original source: https://github.com/IntelRealSense/realsense-ros/tree/ros2-master/realsense2_description/urdf/_d435.urdf.xacro -->
+    <xacro:property name="camera_name" default="camera" />
+    <xacro:property name="M_PI" value="3.1415926535897931" />
+    <xacro:property name="d435_cam_depth_to_color_offset" value="0.015"/>
+
+    <!-- Add TF between camera color frame and EE (calibration result) -->
+    <link name="${camera_name}_color_optical_frame" />
+    <joint name="${arm_id}_hand_camera_joint" type="fixed">
+      <origin xyz="0.05016829 -0.03866155 0.05437667" rpy="0.0032354 -0.003 1.5718945" />
+      <parent link="${arm_id}_hand" />
+      <child link="${camera_name}_color_optical_frame" />
+    </joint>
+
+    <link name="${camera_name}_color_frame"/>
+    <joint name="${camera_name}_color_optical_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="-1.571 -1.571 3.142" />
+      <parent link="${camera_name}_color_optical_frame" />
+      <child link="${camera_name}_color_frame" />
+    </joint>
+
+    <link name="${camera_name}_link"/>
+    <joint name="${camera_name}_color_joint" type="fixed">
+      <origin xyz="0 -${d435_cam_depth_to_color_offset} 0" rpy="0 0 0" />
+      <parent link="${camera_name}_color_frame" />
+      <child link="${camera_name}_link" />
+    </joint>
+
+    <joint name="${camera_name}_depth_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <parent link="${camera_name}_link"/>
+      <child link="${camera_name}_depth_frame" />
+    </joint>
+    <link name="${camera_name}_depth_frame"/>
+
+    <joint name="${camera_name}_depth_optical_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="${-M_PI/2} 0 ${-M_PI/2}" />
+      <parent link="${camera_name}_depth_frame" />
+      <child link="${camera_name}_depth_optical_frame" />
+    </joint>
+    <link name="${camera_name}_depth_optical_frame"/>
+
   </xacro:macro>
 </robot>
